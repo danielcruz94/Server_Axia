@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+// autorizacion de los usuarios
+const authenticateToken = require('../middleware/auth.middleware');
+const authorizeRoles = require('../middleware/roles.middleware');
 
 const crearCliente = require('../controllers/crearCliente');
 const obtenerCliente = require('../controllers/obtenerCliente');
@@ -10,6 +13,7 @@ const getAllClientes = require('../controllers/GetAllClientes');
 const { procesarMiniPlan } = require('../controllers/miniplan');
 const { exportarClientes } = require('../controllers/exportarClientesController');
 const { enviarCorreoConPDF } = require('../controllers/enviarCorreo');
+const  {GetDataClientesPlanFinanciero}  = require('../controllers/getDatosPlanFinanciero');
 
 const multer = require('multer');
 
@@ -19,7 +23,15 @@ const upload = multer({ storage: storage });
 
 // Ruta para crear un nuevo cliente
 router.post('/clientes', crearCliente);
-router.get('/clientes', getAllClientes);
+
+
+//EXPORTAR DATOS A EXCEL
+//Ruta Mini Plan Financiero Descargar datos
+router.get('/ClienteAxias',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), exportarClientes);
+
+router.get('/datos/clientes/plan-financiero',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), GetDataClientesPlanFinanciero);
+
+
 
 // Ruta para obtener los datos de un cliente por su ID
 router.get('/clientes/:cedula', obtenerCliente);
@@ -36,8 +48,7 @@ router.get('/cliente/:cedula/fieldset', obtenerFieldset);
 //Ruta Mini Plan Financiero
 router.post('/miniplan', procesarMiniPlan);
 
-//Ruta Mini Plan Financiero Descargar datos
-router.get('/ClienteAxias', exportarClientes);
+
 
 // Ruta para enviar el correo con el PDF adjunto
 router.post('/Email', upload.single('pdf'), async (req, res) => {
