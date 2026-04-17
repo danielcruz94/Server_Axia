@@ -48,8 +48,6 @@ router.get('/cliente/:cedula/fieldset', obtenerFieldset);
 //Ruta Mini Plan Financiero
 router.post('/miniplan', procesarMiniPlan);
 
-
-
 // Ruta para enviar el correo con el PDF adjunto
 router.post('/Email', upload.single('pdf'), async (req, res) => {
     try {
