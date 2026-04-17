@@ -29,7 +29,7 @@ router.post('/clientes', crearCliente);
 //Ruta Mini Plan Financiero Descargar datos
 router.get('/ClienteAxias',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), exportarClientes);
 
-router.get('/datos/clientes/plan-financiero',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), GetDataClientesPlanFinanciero);
+router.get('/datos/clientes/plan-financiero',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), GetDataClxientesPlanFinanciero);
 
 
 
