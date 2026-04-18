@@ -29,7 +29,7 @@ router.post('/clientes', crearCliente);
 //Ruta Mini Plan Financiero Descargar datos
 router.get('/ClienteAxias',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), exportarClientes);
 
-router.get('/datos/clientes/plan-financiero',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), GetDataClxientesPlanFinanciero);
+router.get('/datos/clientes/plan-financiero',authenticateToken, authorizeRoles('ADMIN', 'SUPERADMIN', 'USER'), GetDataClientesPlanFinanciero);
 
 
 
@@ -47,8 +47,6 @@ router.get('/cliente/:cedula/fieldset', obtenerFieldset);
 
 //Ruta Mini Plan Financiero
 router.post('/miniplan', procesarMiniPlan);
-
-
 
 // Ruta para enviar el correo con el PDF adjunto
 router.post('/Email', upload.single('pdf'), async (req, res) => {
