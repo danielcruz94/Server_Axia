@@ -1,0 +1,81 @@
+{
+  "info": {
+    "_postman_id": "8d25e5d1-2e6b-4d1d-9fc6-5-signos-vitales",
+    "name": "AXIA - Los 5 signos vitales financieros",
+    "description": "Colección para probar POST /api/financial-checkup. No incluye integración con calendario.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Crear test financiero - exitoso",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Laura Pérez\",\n  \"whatsapp\": \"3001234567\",\n  \"email\": \"laura@example.com\",\n  \"city\": \"Bogotá\",\n  \"liquidity_answer\": \"Entre 3 y 6 meses\",\n  \"debt_answer\": \"Mis deudas son manejables\",\n  \"protection_answer\": \"Lo he revisado parcialmente\",\n  \"investment_answer\": \"Ahorro, pero no tengo una estrategia definida\",\n  \"retirement_answer\": \"Tengo una idea aproximada\",\n  \"principal_concern\": [\"INV\", \"RET\"],\n  \"income_range\": \"I4\",\n  \"intent\": \"BOOKING\",\n  \"consent_data\": true,\n  \"consent_commercial\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/financial-checkup",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "financial-checkup"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Validación - consentimiento obligatorio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Laura Pérez\",\n  \"whatsapp\": \"3001234567\",\n  \"email\": \"laura@example.com\",\n  \"city\": \"Bogotá\",\n  \"liquidity_answer\": \"Entre 3 y 6 meses\",\n  \"debt_answer\": \"Mis deudas son manejables\",\n  \"protection_answer\": \"Lo he revisado parcialmente\",\n  \"investment_answer\": \"Ahorro, pero no tengo una estrategia definida\",\n  \"retirement_answer\": \"Tengo una idea aproximada\",\n  \"principal_concern\": [],\n  \"income_range\": \"I4\",\n  \"intent\": \"BOOKING\",\n  \"consent_data\": false,\n  \"consent_commercial\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/financial-checkup",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "financial-checkup"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

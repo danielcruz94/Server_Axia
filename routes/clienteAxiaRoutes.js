@@ -14,6 +14,7 @@ const { procesarMiniPlan } = require('../controllers/miniplan');
 const { exportarClientes } = require('../controllers/exportarClientesController');
 const { enviarCorreoConPDF } = require('../controllers/enviarCorreo');
 const  {GetDataClientesPlanFinanciero}  = require('../controllers/getDatosPlanFinanciero');
+const { createFinancialCheckup } = require('../controllers/financialCheckupController');
 
 const multer = require('multer');
 
@@ -47,6 +48,9 @@ router.get('/cliente/:cedula/fieldset', obtenerFieldset);
 
 //Ruta Mini Plan Financiero
 router.post('/miniplan', procesarMiniPlan);
+
+// Test "Los 5 signos vitales financieros"
+router.post('/financial-checkup', createFinancialCheckup);
 
 // Ruta para enviar el correo con el PDF adjunto
 router.post('/Email', upload.single('pdf'), async (req, res) => {
