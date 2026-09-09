@@ -17,6 +17,13 @@ const  {GetDataClientesPlanFinanciero}  = require('../controllers/getDatosPlanFi
 const { createFinancialCheckup } = require('../controllers/financialCheckupController');
 
 const multer = require('multer');
+const {
+    conexionCalendar,
+    callbackApiCalendar,
+    
+    consultarDisponibilidad,
+    agendarCita
+} = require('../controllers/API-Calendar/calendarController');
 
 // Configurar multer para manejar el archivo PDF
 const storage = multer.memoryStorage();
@@ -45,6 +52,20 @@ router.put('/actualizar', actualizarCliente);
 
 // Ruta para obtener fieldset
 router.get('/cliente/:cedula/fieldset', obtenerFieldset);
+
+router.get('/calendar/google/connect', conexionCalendar);
+router.get('/calendar/google/callback', callbackApiCalendar);
+
+router.get(
+  '/calendar/availability',
+  consultarDisponibilidad
+);
+
+router.post(
+  '/calendar/appointment',
+  agendarCita
+);
+
 
 //Ruta Mini Plan Financiero
 router.post('/miniplan', procesarMiniPlan);

@@ -23,6 +23,7 @@
     "echarts": "^6.0.0",
     "exceljs": "^4.4.0",
     "express": "^4.21.2",
+    "googleapis": "^178.1.1",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^6.11.0",
