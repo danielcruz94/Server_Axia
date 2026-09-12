@@ -17,6 +17,22 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar'
 ];
 
+const CALENDAR_ENV_VARS = {
+  NICOLAS: 'GOOGLE_CALENDAR_ID_NICOLAS',
+  LAURA: 'GOOGLE_CALENDAR_ID_LAURA'
+};
+
+const obtenerConfiguracionCalendario = (calendarKey) => {
+  const normalizedKey = String(calendarKey || '').toUpperCase();
+  const envVar = CALENDAR_ENV_VARS[normalizedKey];
+
+  return {
+    calendarKey: normalizedKey,
+    calendarId: envVar ? process.env[envVar] : null,
+    envVar
+  };
+};
+
 /**
  * Conectar Google Calendar
  */
@@ -74,7 +90,23 @@ const callbackApiCalendar = async (req, res) => {
 const consultarDisponibilidad = async (req, res) => {
   try {
 
-    const { date } = req.query;
+    const { date, calendar: calendarKey } = req.query;
+
+    const calendarConfig = obtenerConfiguracionCalendario(calendarKey);
+
+    if (!calendarConfig.envVar) {
+      return res.status(400).json({
+        success: false,
+        message: 'Debes enviar calendar con uno de estos valores: NICOLAS o LAURA'
+      });
+    }
+
+    if (!calendarConfig.calendarId) {
+      return res.status(500).json({
+        success: false,
+        message: `${calendarConfig.envVar} no está configurado`
+      });
+    }
 
     // Validar que venga la fecha
     if (!date) {
@@ -94,14 +126,19 @@ const consultarDisponibilidad = async (req, res) => {
       });
     }
 
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+    const esDomingo = new Date(`${date}T00:00:00Z`).getUTCDay() === 0;
 
-    if (!calendarId) {
-      return res.status(500).json({
-        success: false,
-        message: 'GOOGLE_CALENDAR_ID no está configurado'
+    if (esDomingo) {
+      return res.status(200).json({
+        success: true,
+        date,
+        calendar: calendarConfig.calendarKey,
+        durationMinutes: 30,
+        slots: []
       });
     }
+
+    const { calendarId } = calendarConfig;
 
     const calendar = google.calendar({
       version: 'v3',
@@ -112,7 +149,7 @@ const consultarDisponibilidad = async (req, res) => {
      * Horario laboral
      */
     const horaInicio = '08:00';
-    const horaFin = '17:00';
+    const horaFin = '21:00';
 
     /**
      * Inicio y fin de la consulta
@@ -155,6 +192,7 @@ const consultarDisponibilidad = async (req, res) => {
     res.status(200).json({
       success: true,
       date,
+      calendar: calendarConfig.calendarKey,
       durationMinutes: 30,
       slots
     });
@@ -283,14 +321,31 @@ const agendarCita = async (req, res) => {
       name,
       email,
       date,
-      startTime
+      startTime,
+      calendar: calendarKey
     } = req.body;
 
     // Validaciones
-    if (!name || !email || !date || !startTime) {
+    if (!name || !email || !date || !startTime || !calendarKey) {
       return res.status(400).json({
         success: false,
-        message: 'name, email, date y startTime son obligatorios'
+        message: 'name, email, date, startTime y calendar son obligatorios'
+      });
+    }
+
+    const calendarConfig = obtenerConfiguracionCalendario(calendarKey);
+
+    if (!calendarConfig.envVar) {
+      return res.status(400).json({
+        success: false,
+        message: 'calendar debe ser NICOLAS o LAURA'
+      });
+    }
+
+    if (!calendarConfig.calendarId) {
+      return res.status(500).json({
+        success: false,
+        message: `${calendarConfig.envVar} no está configurado`
       });
     }
 
@@ -310,6 +365,15 @@ const agendarCita = async (req, res) => {
       });
     }
 
+    const esDomingo = new Date(`${date}T00:00:00Z`).getUTCDay() === 0;
+
+    if (esDomingo) {
+      return res.status(400).json({
+        success: false,
+        message: 'No puedes agendar citas los domingos'
+      });
+    }
+
     if (!/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTime)) {
       return res.status(400).json({
         success: false,
@@ -317,14 +381,18 @@ const agendarCita = async (req, res) => {
       });
     }
 
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startMinutes = hours * 60 + minutes;
+    const endMinutes = startMinutes + 30;
 
-    if (!calendarId) {
-      return res.status(500).json({
+    if (startMinutes < 8 * 60 || endMinutes > 21 * 60) {
+      return res.status(400).json({
         success: false,
-        message: 'GOOGLE_CALENDAR_ID no está configurado'
+        message: 'Las citas solo están disponibles entre las 08:00 y las 21:00'
       });
     }
+
+    const { calendarId } = calendarConfig;
 
     const calendar = google.calendar({
       version: 'v3',
@@ -332,11 +400,6 @@ const agendarCita = async (req, res) => {
     });
 
     // La cita dura 30 minutos
-    const [hours, minutes] = startTime.split(':').map(Number);
-
-    const startMinutes = hours * 60 + minutes;
-    const endMinutes = startMinutes + 30;
-
     const endHours = Math.floor(endMinutes / 60);
     const endMinutesRest = endMinutes % 60;
 
@@ -437,6 +500,7 @@ const agendarCita = async (req, res) => {
         email,
         date,
         startTime,
+        calendar: calendarConfig.calendarKey,
         endTime,
         durationMinutes: 30,
         calendarLink: response.data.htmlLink
