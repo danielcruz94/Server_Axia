@@ -22,6 +22,23 @@ const CALENDAR_ENV_VARS = {
   LAURA: 'GOOGLE_CALENDAR_ID_LAURA'
 };
 
+const obtenerHorarioLaboral = (date) => {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return {
+      horaInicio: '08:00',
+      horaFin: '21:00'
+    };
+  }
+
+  const fecha = new Date(`${date}T12:00:00-05:00`);
+  const esSabado = fecha.getDay() === 6;
+
+  return {
+    horaInicio: '08:00',
+    horaFin: esSabado ? '12:00' : '21:00'
+  };
+};
+
 const obtenerConfiguracionCalendario = (calendarKey) => {
   const normalizedKey = String(calendarKey || '').toUpperCase();
   const envVar = CALENDAR_ENV_VARS[normalizedKey];
@@ -148,8 +165,7 @@ const consultarDisponibilidad = async (req, res) => {
     /**
      * Horario laboral
      */
-    const horaInicio = '08:00';
-    const horaFin = '21:00';
+    const { horaInicio, horaFin } = obtenerHorarioLaboral(date);
 
     /**
      * Inicio y fin de la consulta
@@ -212,6 +228,12 @@ const consultarDisponibilidad = async (req, res) => {
 /**
  * Generar slots disponibles de 30 minutos
  */
+const convertirHoraAMinutos = (hora) => {
+  const [horas, minutos] = hora.split(':').map(Number);
+
+  return horas * 60 + minutos;
+};
+
 const generarSlotsDisponibles = (
   busy,
   fecha,
@@ -223,17 +245,8 @@ const generarSlotsDisponibles = (
 
   const minutosPorSlot = 30;
 
-  /**
-   * Convertimos HH:mm a minutos
-   */
-  const convertirAMinutos = (hora) => {
-    const [horas, minutos] = hora.split(':').map(Number);
-
-    return horas * 60 + minutos;
-  };
-
-  const inicioJornada = convertirAMinutos(horaInicio);
-  const finJornada = convertirAMinutos(horaFin);
+  const inicioJornada = convertirHoraAMinutos(horaInicio);
+  const finJornada = convertirHoraAMinutos(horaFin);
 
   /**
    * Convertir eventos ocupados a minutos
@@ -374,6 +387,9 @@ const agendarCita = async (req, res) => {
       });
     }
 
+    const horarioLaboral = obtenerHorarioLaboral(date);
+    const horaLimiteFin = convertirHoraAMinutos(horarioLaboral.horaFin);
+
     if (!/^([01]\d|2[0-3]):([0-5]\d)$/.test(startTime)) {
       return res.status(400).json({
         success: false,
@@ -385,10 +401,10 @@ const agendarCita = async (req, res) => {
     const startMinutes = hours * 60 + minutes;
     const endMinutes = startMinutes + 30;
 
-    if (startMinutes < 8 * 60 || endMinutes > 21 * 60) {
+    if (startMinutes < 8 * 60 || endMinutes > horaLimiteFin) {
       return res.status(400).json({
         success: false,
-        message: 'Las citas solo están disponibles entre las 08:00 y las 21:00'
+        message: `Las citas solo están disponibles entre las 08:00 y las ${horarioLaboral.horaFin}`
       });
     }
 
@@ -529,5 +545,8 @@ module.exports = {
   conexionCalendar,
   callbackApiCalendar,
   consultarDisponibilidad,
-  agendarCita
+  agendarCita,
+  obtenerHorarioLaboral,
+  generarSlotsDisponibles,
+  convertirHoraAMinutos
 };

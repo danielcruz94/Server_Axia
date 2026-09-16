@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const { calculateFinancialResult, validateInput } = require('../services/financialCheckupService');
+const { obtenerHorarioLaboral, generarSlotsDisponibles } = require('../controllers/API-Calendar/calendarController');
 
 const validInput = {
   name: 'Laura Pérez',
@@ -51,4 +52,16 @@ test('rechaza consentimiento de datos, respuestas inválidas y scores enviados',
   assert.match(validateInput({ ...validInput, consent_data: false }), /consentimiento/);
   assert.match(validateInput({ ...validInput, liquidity_answer: '0', liquidity_score: 3 }), /liquidity_answer/);
   assert.equal(validateInput({ ...validInput, total_score: 0 }), null);
+});
+
+test('en sábado solo se muestran horarios hasta las 12:00', () => {
+  const horario = obtenerHorarioLaboral('2026-09-19');
+
+  assert.deepEqual(horario, { horaInicio: '08:00', horaFin: '12:00' });
+
+  const slots = generarSlotsDisponibles([], '2026-09-19', horario.horaInicio, horario.horaFin);
+
+  assert.equal(slots.length, 8);
+  assert.deepEqual(slots[0], { start: '08:00', end: '08:30' });
+  assert.deepEqual(slots[slots.length - 1], { start: '11:30', end: '12:00' });
 });
