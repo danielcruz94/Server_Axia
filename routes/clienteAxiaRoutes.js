@@ -24,6 +24,12 @@ const {
     consultarDisponibilidad,
     agendarCita
 } = require('../controllers/API-Calendar/calendarController');
+const {
+    conexionCalendar: conexionCalendarOracle,
+    callbackApiCalendar: callbackApiCalendarOracle,
+    consultarDisponibilidad: consultarDisponibilidadOracle,
+    agendarCita: agendarCitaOracle
+} = require('../controllers/API-Calendar/calendarOracleController');
 
 // Configurar multer para manejar el archivo PDF
 const storage = multer.memoryStorage();
@@ -65,6 +71,11 @@ router.post(
   '/calendar/appointment',
   agendarCita
 );
+
+router.get('/calendar/oracle/connect', conexionCalendarOracle);
+router.get('/calendar/oracle/callback', callbackApiCalendarOracle);
+router.get('/calendar/oracle/availability', consultarDisponibilidadOracle);
+router.post('/calendar/oracle/appointment', agendarCitaOracle);
 
 
 //Ruta Mini Plan Financiero

@@ -19,7 +19,10 @@ const SCOPES = [
 
 const CALENDAR_ENV_VARS = {
   NICOLAS: 'GOOGLE_CALENDAR_ID_NICOLAS',
-  LAURA: 'GOOGLE_CALENDAR_ID_LAURA'
+  LAURA: 'GOOGLE_CALENDAR_ID_LAURA',
+  AMANDA: 'GOOGLE_CALENDAR_ID_AMANDA',
+  ANDREA: 'GOOGLE_CALENDAR_ID_ANDREA',
+  CARLOS: 'GOOGLE_CALENDAR_ID_CARLOS'
 };
 
 const obtenerHorarioLaboral = (date) => {
@@ -114,7 +117,7 @@ const consultarDisponibilidad = async (req, res) => {
     if (!calendarConfig.envVar) {
       return res.status(400).json({
         success: false,
-        message: 'Debes enviar calendar con uno de estos valores: NICOLAS o LAURA'
+        message: 'Debes enviar calendar con uno de estos valores: NICOLAS, LAURA, AMANDA, ANDREA o CARLOS'
       });
     }
 
