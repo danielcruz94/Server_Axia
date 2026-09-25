@@ -21,8 +21,8 @@ const CALENDAR_ENV_VARS = {
 };
 
 const ORACLE_SCHEDULE = {
-  '2026-09-30': ['AMANDA', 'ANDREA', 'NICOLAS'],
-  '2026-10-01': ['LAURA', 'CARLOS']
+  '2026-09-30': ['AMANDA', 'NICOLAS'],
+  '2026-10-01': ['LAURA', 'CARLOS','ANDREA']
 };
 
 const HORA_INICIO = '09:00';
